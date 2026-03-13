@@ -3,6 +3,8 @@
 [![Gem Version](https://badge.fury.io/rb/einvoicing.svg)](https://rubygems.org/gems/einvoicing)
 [![CI](https://github.com/sxnlabs/einvoicing/actions/workflows/ci.yml/badge.svg)](https://github.com/sxnlabs/einvoicing/actions)
 
+**[Documentation & overview → sxnlabs.com/gems/einvoicing](https://www.sxnlabs.com/en/gems/einvoicing/)**
+
 **EN 16931 electronic invoicing for Ruby.** Generate Factur-X (PDF/A-3 + CII XML), UBL 2.1, and CII D16B invoices. Validate French B2B compliance (SIREN, SIRET, TVA). Rails-ready.
 
 ## Why

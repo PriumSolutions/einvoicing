@@ -12,7 +12,13 @@ Gem::Specification.new do |s|
 
   s.authors  = ["Nathan Le Ray"]
   s.email    = ["nathan@sxnlabs.com"]
-  s.homepage = "https://github.com/sxnlabs/einvoicing"
+  s.homepage = "https://www.sxnlabs.com/en/gems/einvoicing/"
+  s.metadata = {
+    "homepage_uri"      => "https://www.sxnlabs.com/en/gems/einvoicing/",
+    "source_code_uri"   => "https://github.com/sxnlabs/einvoicing",
+    "changelog_uri"     => "https://github.com/sxnlabs/einvoicing/blob/master/CHANGELOG.md",
+    "documentation_uri" => "https://www.sxnlabs.com/en/gems/einvoicing/"
+  }
   s.license  = "MIT"
 
   s.required_ruby_version = ">= 3.2"

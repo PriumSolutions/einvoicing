@@ -20,7 +20,7 @@ module Einvoicing
     #   errors #=> [] when valid, or [{ field:, error:, message: }] when invalid
     module Peppol
       XSLT_URL  = "https://github.com/OpenPEPPOL/peppol-bis-invoice-3/releases/download/3.0.21/PEPPOL-EN16931-UBL.xslt"
-      SAXON_URL = "https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/12.5/Saxon-HE-12.5.jar"
+      SAXON_URL = "https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/10.9/Saxon-HE-10.9.jar"
       SAXON_JAR = "/tmp/saxon-he.jar"
       XSLT_PATH = File.expand_path("../data/PEPPOL-EN16931-UBL.xslt", __dir__)
 

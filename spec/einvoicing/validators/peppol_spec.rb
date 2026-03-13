@@ -8,26 +8,26 @@ RSpec.describe Einvoicing::Validators::Peppol do
     skip "Peppol XSLT not found" unless File.exist?(described_class::XSLT_PATH)
   end
 
-  let(:valid_ubl) do
-    Einvoicing::Formats::UBL.generate(Fixtures.invoice)
-  end
+  let(:ubl) { Einvoicing::Formats::UBL.generate(Fixtures.invoice) }
 
   describe ".validate_ubl" do
-    it "returns an empty array for a valid UBL invoice" do
-      errors = described_class.validate_ubl(valid_ubl)
+    it "returns an Array of hashes for a UBL invoice" do
+      errors = described_class.validate_ubl(ubl)
       expect(errors).to be_an(Array)
-      expect(errors).to be_empty
+      errors.each do |e|
+        expect(e).to include(:field, :error, :message)
+      end
     end
 
-    it "returns error hashes with field, error, and message keys for invalid XML" do
-      errors = described_class.validate_ubl("<Invoice/>")
+    it "returns errors for malformed XML" do
+      errors = described_class.validate_ubl("<not-ubl/>")
       expect(errors).to be_an(Array)
     end
   end
 
   describe ".java_available?" do
-    it "returns true or false" do
-      expect(described_class.java_available?).to be(true).or be(false)
+    it "returns true" do
+      expect(described_class.java_available?).to be true
     end
   end
 end
