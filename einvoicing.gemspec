@@ -29,4 +29,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "nokogiri", "~> 1.16" # XSD validation in specs
   s.add_development_dependency "rexml"    # Bundled gem in Ruby 4.0+
   s.add_development_dependency "prawn"    # PDF generation in sample scripts
+  s.add_development_dependency "webmock", "~> 3.0"
 end

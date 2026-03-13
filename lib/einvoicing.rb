@@ -18,6 +18,7 @@ require_relative "einvoicing/validators/base"
 require_relative "einvoicing/validators/fr"
 require_relative "einvoicing/invoiceable"
 require_relative "einvoicing/rails/concern"
+require_relative "einvoicing/ppf"
 
 # Optional Rails engine — only load when Rails is available.
 if defined?(Rails::Engine)
