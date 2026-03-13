@@ -12,11 +12,15 @@ module Einvoicing
     #
     #   Einvoicing::Validators::FR.validate!(invoice) # raises on failure
     module FR
-      SIREN_RE  = /\A\d{9}\z/
-      SIRET_RE  = /\A\d{14}\z/
+      SIREN_RE   = /\A\d{9}\z/
+      SIRET_RE   = /\A\d{14}\z/
       # FR VAT: "FR" + 2 alphanumeric chars + 9-digit SIREN
-      VAT_RE    = /\AFR[A-Z0-9]{2}\d{9}\z/
+      VAT_RE     = /\AFR[A-Z0-9]{2}\d{9}\z/
       INV_NUM_RE = /\A[\w\-\/]{1,35}\z/
+      # IBAN: country code (2 alpha) + 2 check digits + BBAN (11-30 alphanumeric) = 15-34 total
+      IBAN_RE    = /\A[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}\z/
+      # BIC: 4 alpha (institution) + 2 alpha (country) + 2 alphanumeric (location) + optional 3 alphanumeric (branch)
+      BIC_RE     = /\A[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?\z/
 
       # @param invoice [Einvoicing::Invoice]
       # @return [Array<Hash>] list of error hashes ({ field:, error:, message: }); empty if valid
@@ -69,6 +73,26 @@ module Einvoicing
         number.to_s.match?(INV_NUM_RE)
       end
 
+      # Validate an IBAN (ISO 13616 format + mod-97 checksum).
+      # @param iban [String]
+      # @return [Boolean]
+      def self.valid_iban?(iban)
+        str = iban.to_s.gsub(/\s/, "").upcase
+        return false unless str.match?(IBAN_RE)
+
+        # Move first 4 chars to end, replace each letter with its numeric value (A=10..Z=35)
+        rearranged = str[4..] + str[0..3]
+        numeric = rearranged.chars.map { |c| c =~ /[A-Z]/ ? (c.ord - 55).to_s : c }.join
+        numeric.to_i % 97 == 1
+      end
+
+      # Validate a BIC (ISO 9362) — 8 or 11 chars.
+      # @param bic [String]
+      # @return [Boolean]
+      def self.valid_bic?(bic)
+        bic.to_s.match?(BIC_RE)
+      end
+
       # -- Private helpers ---------------------------------------------------
 
       def self.validate_invoice_fields(invoice)
@@ -86,6 +110,19 @@ module Einvoicing
         unless valid_invoice_number?(invoice.invoice_number.to_s)
           errors << { field: :invoice_number, error: :number_invalid,
                       message: Einvoicing::I18n.t("errors.invoice.number_invalid") }
+        end
+        if invoice.document_type == :credit_note &&
+           invoice.original_invoice_number.to_s.strip.empty?
+          errors << { field: :original_invoice_number, error: :original_invoice_number_missing,
+                      message: Einvoicing::I18n.t("errors.invoice.original_invoice_number_missing") }
+        end
+        if invoice.iban && !valid_iban?(invoice.iban)
+          errors << { field: :iban, error: :iban_invalid,
+                      message: Einvoicing::I18n.t("errors.invoice.iban_invalid") }
+        end
+        if invoice.bic && !valid_bic?(invoice.bic)
+          errors << { field: :bic, error: :bic_invalid,
+                      message: Einvoicing::I18n.t("errors.invoice.bic_invalid") }
         end
         errors
       end

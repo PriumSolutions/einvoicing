@@ -23,6 +23,7 @@ module Einvoicing
     :issue_date,
     :due_date,
     :currency,
+    :tax_currency,
     :seller,
     :buyer,
     :lines,
@@ -31,18 +32,23 @@ module Einvoicing
     :note,
     :payment_means_code,
     :iban,
-    :bic
+    :bic,
+    :document_type,
+    :original_invoice_number,
+    :original_invoice_date
   ) do
     def initialize(invoice_number:, issue_date:, seller:, buyer:, lines:,
-                   due_date: nil, currency: "EUR", tax_breakdown: nil,
+                   due_date: nil, currency: "EUR", tax_currency: nil, tax_breakdown: nil,
                    payment_reference: nil, note: nil,
-                   payment_means_code: nil, iban: nil, bic: nil)
+                   payment_means_code: nil, iban: nil, bic: nil,
+                   document_type: :invoice, original_invoice_number: nil, original_invoice_date: nil)
       computed_breakdown = tax_breakdown || compute_tax_breakdown(lines)
       super(
         invoice_number: invoice_number,
         issue_date: issue_date,
         due_date: due_date,
         currency: currency,
+        tax_currency: tax_currency,
         seller: seller,
         buyer: buyer,
         lines: lines,
@@ -51,7 +57,10 @@ module Einvoicing
         note: note,
         payment_means_code: payment_means_code,
         iban: iban,
-        bic: bic
+        bic: bic,
+        document_type: document_type,
+        original_invoice_number: original_invoice_number,
+        original_invoice_date: original_invoice_date
       )
     end
 

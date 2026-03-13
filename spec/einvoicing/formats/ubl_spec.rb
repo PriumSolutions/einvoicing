@@ -140,4 +140,75 @@ RSpec.describe Einvoicing::Formats::UBL do
       expect(xml).not_to include("cac:PaymentMeans")
     end
   end
+
+  it "always emits BuyerReference (falls back to invoice_number)" do
+    inv = Einvoicing::Invoice.new(
+      invoice_number: "INV-2024-001",
+      issue_date:     Date.new(2024, 1, 15),
+      seller:         Fixtures.seller,
+      buyer:          Fixtures.buyer,
+      lines:          [Fixtures.line]
+    )
+    xml_no_ref = described_class.generate(inv)
+    expect(xml_no_ref).to include("<cbc:BuyerReference>INV-2024-001</cbc:BuyerReference>")
+  end
+
+  it "emits TaxCurrencyCode when tax_currency is set" do
+    inv = Einvoicing::Invoice.new(
+      invoice_number: "INV-2024-001",
+      issue_date:     Date.new(2024, 1, 15),
+      seller:         Fixtures.seller,
+      buyer:          Fixtures.buyer,
+      lines:          [Fixtures.line],
+      currency:       "USD",
+      tax_currency:   "EUR"
+    )
+    xml_with_tax_currency = described_class.generate(inv)
+    expect(xml_with_tax_currency).to include("<cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>")
+  end
+
+  it "omits TaxCurrencyCode when tax_currency is nil" do
+    expect(xml).not_to include("TaxCurrencyCode")
+  end
+
+  context "credit note" do
+    let(:invoice) do
+      Einvoicing::Invoice.new(
+        invoice_number:          "AVOIR-2024-001",
+        issue_date:              Date.new(2024, 4, 1),
+        seller:                  Fixtures.seller,
+        buyer:                   Fixtures.buyer,
+        lines:                   [Fixtures.line],
+        document_type:           :credit_note,
+        original_invoice_number: "FAC-2024-0042",
+        original_invoice_date:   Date.new(2024, 3, 15)
+      )
+    end
+
+    it "uses CreditNote as root element" do
+      expect(xml).to include("<CreditNote")
+      expect(xml).not_to include("<Invoice")
+    end
+
+    it "uses CreditNote-2 namespace" do
+      expect(xml).to include("urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2")
+    end
+
+    it "uses InvoiceTypeCode 381" do
+      expect(xml).to include("<cbc:InvoiceTypeCode>381</cbc:InvoiceTypeCode>")
+    end
+
+    it "includes BillingReference to original invoice" do
+      expect(xml).to include("cac:BillingReference")
+      expect(xml).to include("FAC-2024-0042")
+      expect(xml).to include("2024-03-15")
+    end
+
+    it "is well-formed XML" do
+      require "rexml/document"
+      doc = REXML::Document.new(xml)
+      expect(doc.root).not_to be_nil
+      expect(doc.root.name).to eq("CreditNote")
+    end
+  end
 end

@@ -7,6 +7,9 @@ fr:
         issue_date_missing: "La date d'émission est requise"
         currency_missing: "La devise est requise"
         lines_empty: "La facture doit comporter au moins une ligne"
+        original_invoice_number_missing: "Le numéro de facture d'origine est requis pour les avoirs"
+        iban_invalid: "Le format ou la somme de contrôle de l'IBAN est invalide"
+        bic_invalid: "Le format du BIC est invalide (8 ou 11 caractères)"
       seller:
         name_missing: "Le nom du vendeur est requis"
         siren_invalid: "Le SIREN du vendeur doit comporter 9 chiffres (vérification Luhn échouée)"

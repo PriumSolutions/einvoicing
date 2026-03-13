@@ -11,21 +11,26 @@ module Einvoicing
       CUSTOMIZATION_ID = "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0"
       PROFILE_ID       = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
 
-      UBL_NS  = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-      CAC_NS  = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-      CBC_NS  = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+      UBL_NS             = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+      UBL_CREDIT_NOTE_NS = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+      CAC_NS             = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+      CBC_NS             = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
 
       def self.generate(invoice)
         b = XMLBuilder.new
+        credit_note = invoice.document_type == :credit_note
+        root_ns = credit_note ? UBL_CREDIT_NOTE_NS : UBL_NS
+        root_tag = credit_note ? "CreditNote" : "Invoice"
         b.tag(
-          "Invoice",
-          "xmlns"     => UBL_NS,
+          root_tag,
+          "xmlns"     => root_ns,
           "xmlns:cac" => CAC_NS,
           "xmlns:cbc" => CBC_NS
         ) do
           header(b, invoice)
           supplier_party(b, invoice.seller)
           customer_party(b, invoice.buyer)
+          billing_reference(b, invoice) if credit_note && invoice.original_invoice_number
           payment_means(b, invoice) if invoice.payment_means_code
           tax_total(b, invoice)
           monetary_total(b, invoice)
@@ -44,10 +49,11 @@ module Einvoicing
         b.text("cbc:ID",              invoice.invoice_number)
         b.text("cbc:IssueDate",       format_date(invoice.issue_date))
         b.text("cbc:DueDate",         format_date(invoice.due_date)) if invoice.due_date
-        b.text("cbc:InvoiceTypeCode", "380")
+        b.text("cbc:InvoiceTypeCode", invoice.document_type == :credit_note ? "381" : "380")
         b.text("cbc:Note",            invoice.note) if invoice.note
         b.text("cbc:DocumentCurrencyCode", invoice.currency)
-        b.text("cbc:BuyerReference", invoice.payment_reference) if invoice.payment_reference
+        b.text("cbc:TaxCurrencyCode", invoice.tax_currency) if invoice.tax_currency
+        b.text("cbc:BuyerReference",  invoice.payment_reference || invoice.invoice_number)
       end
       private_class_method :header
 
@@ -169,6 +175,18 @@ module Einvoicing
         end
       end
       private_class_method :invoice_line
+
+      def self.billing_reference(b, invoice)
+        b.tag("cac:BillingReference") do
+          b.tag("cac:InvoiceDocumentReference") do
+            b.text("cbc:ID", invoice.original_invoice_number)
+            if invoice.original_invoice_date
+              b.text("cbc:IssueDate", format_date(invoice.original_invoice_date))
+            end
+          end
+        end
+      end
+      private_class_method :billing_reference
 
       def self.payment_means(b, invoice)
         b.tag("cac:PaymentMeans") do

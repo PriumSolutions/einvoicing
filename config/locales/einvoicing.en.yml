@@ -7,6 +7,9 @@ en:
         issue_date_missing: "Issue date is required"
         currency_missing: "Currency is required"
         lines_empty: "Invoice must have at least one line item"
+        original_invoice_number_missing: "Original invoice number is required for credit notes"
+        iban_invalid: "IBAN format or checksum is invalid"
+        bic_invalid: "BIC format is invalid (8 or 11 characters)"
       seller:
         name_missing: "Seller name is required"
         siren_invalid: "Seller SIREN must be 9 digits (Luhn check failed)"

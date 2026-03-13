@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Credit notes (`document_type: :credit_note`, TypeCode 381) in CII and UBL
+- BillingReference in UBL credit notes referencing original invoice
+- IBAN and BIC format validation in FR validator
+- TaxCurrencyCode support in UBL for non-EUR invoices
+- XSD schema validation in test suite
+- BuyerReference always emitted in UBL (EN 16931 BT-10 compliance, fallback to invoice_number)
+
 ## [0.2.0] - 2026-03-13
 
 ### Added

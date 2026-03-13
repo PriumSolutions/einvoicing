@@ -47,9 +47,16 @@ module Einvoicing
       def self.exchanged_document(b, invoice)
         b.tag("rsm:ExchangedDocument") do
           b.text("ram:ID", invoice.invoice_number)
-          b.text("ram:TypeCode", "380")
+          b.text("ram:TypeCode", invoice.document_type == :credit_note ? "381" : "380")
           b.tag("ram:IssueDateTime") do
             b.text("udt:DateTimeString", format_date(invoice.issue_date), "format" => "102")
+          end
+          if invoice.document_type == :credit_note && invoice.original_invoice_number
+            b.tag("ram:IncludedNote") do
+              note = "Avoir sur facture #{invoice.original_invoice_number}"
+              note += " du #{invoice.original_invoice_date.strftime('%d/%m/%Y')}" if invoice.original_invoice_date
+              b.text("ram:Content", note)
+            end
           end
           if invoice.note
             b.tag("ram:IncludedNote") do

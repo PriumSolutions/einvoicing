@@ -160,4 +160,113 @@ RSpec.describe Einvoicing::Validators::FR do
       expect(described_class.validate!(Fixtures.invoice)).to be true
     end
   end
+
+  describe ".valid_iban?" do
+    it "accepts a valid French IBAN" do
+      expect(described_class.valid_iban?("FR7630006000011234567890189")).to be true
+    end
+
+    it "rejects an IBAN with wrong checksum" do
+      expect(described_class.valid_iban?("FR7630006000011234567890188")).to be false
+    end
+
+    it "rejects an IBAN that is too short" do
+      expect(described_class.valid_iban?("FR76")).to be false
+    end
+
+    it "rejects a non-IBAN string" do
+      expect(described_class.valid_iban?("not-an-iban")).to be false
+    end
+  end
+
+  describe ".valid_bic?" do
+    it "accepts an 8-character BIC" do
+      expect(described_class.valid_bic?("BNPAFRPP")).to be true
+    end
+
+    it "accepts an 11-character BIC" do
+      expect(described_class.valid_bic?("BNPAFRPPXXX")).to be true
+    end
+
+    it "rejects a BIC with wrong length" do
+      expect(described_class.valid_bic?("BNPA")).to be false
+    end
+
+    it "rejects a BIC with lowercase letters" do
+      expect(described_class.valid_bic?("bnpafrpp")).to be false
+    end
+  end
+
+  describe "credit note validation" do
+    it "reports missing original_invoice_number for credit notes" do
+      inv = Einvoicing::Invoice.new(
+        invoice_number: "AVOIR-001",
+        issue_date:     Date.today,
+        seller:         Fixtures.seller,
+        buyer:          Fixtures.buyer,
+        lines:          [Fixtures.line],
+        document_type:  :credit_note
+      )
+      errors = described_class.validate(inv)
+      expect(errors).to include(a_hash_including(
+        field: :original_invoice_number,
+        error: :original_invoice_number_missing
+      ))
+    end
+
+    it "accepts a credit note with original_invoice_number" do
+      inv = Einvoicing::Invoice.new(
+        invoice_number:          "AVOIR-001",
+        issue_date:              Date.today,
+        seller:                  Fixtures.seller,
+        buyer:                   Fixtures.buyer,
+        lines:                   [Fixtures.line],
+        document_type:           :credit_note,
+        original_invoice_number: "FAC-2024-0042"
+      )
+      errors = described_class.validate(inv)
+      expect(errors.map { |e| e[:error] }).not_to include(:original_invoice_number_missing)
+    end
+  end
+
+  describe "IBAN/BIC validation" do
+    it "reports invalid IBAN" do
+      inv = Einvoicing::Invoice.new(
+        invoice_number: "INV-001",
+        issue_date:     Date.today,
+        seller:         Fixtures.seller,
+        buyer:          Fixtures.buyer,
+        lines:          [Fixtures.line],
+        iban:           "FR0000000000000000000000000"  # bad checksum
+      )
+      errors = described_class.validate(inv)
+      expect(errors).to include(a_hash_including(field: :iban, error: :iban_invalid))
+    end
+
+    it "accepts a valid IBAN" do
+      inv = Einvoicing::Invoice.new(
+        invoice_number: "INV-001",
+        issue_date:     Date.today,
+        seller:         Fixtures.seller,
+        buyer:          Fixtures.buyer,
+        lines:          [Fixtures.line],
+        iban:           "FR7630006000011234567890189"
+      )
+      errors = described_class.validate(inv)
+      expect(errors.map { |e| e[:error] }).not_to include(:iban_invalid)
+    end
+
+    it "reports invalid BIC" do
+      inv = Einvoicing::Invoice.new(
+        invoice_number: "INV-001",
+        issue_date:     Date.today,
+        seller:         Fixtures.seller,
+        buyer:          Fixtures.buyer,
+        lines:          [Fixtures.line],
+        bic:            "bad"
+      )
+      errors = described_class.validate(inv)
+      expect(errors).to include(a_hash_including(field: :bic, error: :bic_invalid))
+    end
+  end
 end

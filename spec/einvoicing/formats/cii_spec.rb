@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 require "spec_helper"
+require_relative "../../support/schema_validation"
 
 RSpec.describe Einvoicing::Formats::CII do
+  include SchemaValidation
+
   let(:invoice) { Fixtures.invoice }
   let(:xml)     { described_class.generate(invoice) }
 
@@ -149,5 +152,40 @@ RSpec.describe Einvoicing::Formats::CII do
       count = xml.scan("<ram:ApplicableTradeTax>").length
       expect(count).to eq(4)
     end
+  end
+
+  context "credit note" do
+    let(:invoice) do
+      Einvoicing::Invoice.new(
+        invoice_number:          "AVOIR-2024-001",
+        issue_date:              Date.new(2024, 4, 1),
+        seller:                  Fixtures.seller,
+        buyer:                   Fixtures.buyer,
+        lines:                   [Fixtures.line],
+        document_type:           :credit_note,
+        original_invoice_number: "FAC-2024-0042",
+        original_invoice_date:   Date.new(2024, 3, 15)
+      )
+    end
+
+    it "uses TypeCode 381" do
+      expect(xml).to include("<ram:TypeCode>381</ram:TypeCode>")
+    end
+
+    it "includes IncludedNote referencing original invoice" do
+      expect(xml).to include("Avoir sur facture FAC-2024-0042")
+      expect(xml).to include("15/03/2024")
+    end
+
+    it "is well-formed XML" do
+      require "rexml/document"
+      doc = REXML::Document.new(xml)
+      expect(doc.root).not_to be_nil
+    end
+  end
+
+  it "generates XSD-valid CII XML for EN16931 profile" do
+    errors = validate_against_xsd(xml, "EN16931")
+    expect(errors).to be_empty, "XSD errors: #{errors.map(&:message).join(', ')}"
   end
 end
