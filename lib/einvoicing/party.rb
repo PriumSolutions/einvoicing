@@ -25,5 +25,18 @@ module Einvoicing
     def siren_number
       siren || (siret && siret[0, 9])
     end
+
+    # Look up SIRET via the Sirene API and return a new Party with siret filled in.
+    # No-op (returns self) if siren is blank or siret is already set.
+    #
+    # @return [Party] self or new Party with siret populated
+    def fetch_siret!
+      return self unless siren_number && siret.nil?
+
+      result = SiretLookup.find(siren_number)
+      return self unless result
+
+      with(siret: result[:siret])
+    end
   end
 end

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-13
+
+### Added
+- `Einvoicing.xml(invoice, format: :cii | :ubl)` — top-level XML generation
+- `Einvoicing.embed(pdf, invoice_or_xml)` — top-level Factur-X embedding
+- `Einvoicing.validate(invoice, market: :fr)` — top-level validation
+- `Einvoicing.process(invoice, format:, market:, pdf:)` — full pipeline, never raises
+- `Einvoicing::FR::SiretLookup.find(siren)` — SIRET lookup via French government API (no auth, stdlib only)
+- `Einvoicing::FR::SiretLookup.enrich!(party)` — auto-fills SIRET on a Party from its SIREN
+- `Einvoicing::Validators::Peppol.validate_ubl(xml)` — Peppol BIS 3.0 Schematron validation (requires Java + Saxon-HE 12)
+- `Einvoicing::Errors::JavaNotFound`, `Einvoicing::Errors::ValidationError`
+- `lib/einvoicing/fr.rb` — FR submodule entrypoint
+
 ## [0.3.0] - 2026-03-13
 
 ### Added
