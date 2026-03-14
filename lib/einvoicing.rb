@@ -56,10 +56,11 @@ module Einvoicing
   # Generate XML from an invoice.
   # @param invoice [Einvoicing::Invoice]
   # @param format [Symbol] :cii (default, Factur-X) or :ubl (Peppol BIS 3.0)
+  # @param profile [Symbol] :en16931 (default) or :chorus_pro (French B2G portal)
   # @return [String] XML document
-  def self.xml(invoice, format: :cii)
+  def self.xml(invoice, format: :cii, profile: :en16931)
     case format
-    when :cii then Formats::CII.generate(invoice)
+    when :cii then Formats::CII.generate(invoice, profile: profile)
     when :ubl then Formats::UBL.generate(invoice)
     else raise ArgumentError, Einvoicing::I18n.t("formats.unknown_format", fmt: format.inspect)
     end

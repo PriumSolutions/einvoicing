@@ -16,7 +16,7 @@ module Einvoicing
       UDT_NS = "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100"
       QDT_NS = "urn:un:unece:uncefact:data:standard:QualifiedDataType:100"
 
-      def self.generate(invoice)
+      def self.generate(invoice, profile: :en16931)
         b = XMLBuilder.new
         b.tag(
           "rsm:CrossIndustryInvoice",
@@ -28,7 +28,7 @@ module Einvoicing
         ) do
           exchanged_document_context(b)
           exchanged_document(b, invoice)
-          supply_chain_trade_transaction(b, invoice)
+          supply_chain_trade_transaction(b, invoice, profile)
         end
         b.to_xml
       end
@@ -67,12 +67,12 @@ module Einvoicing
       end
       private_class_method :exchanged_document
 
-      def self.supply_chain_trade_transaction(b, invoice)
+      def self.supply_chain_trade_transaction(b, invoice, profile)
         b.tag("rsm:SupplyChainTradeTransaction") do
           invoice.lines.each_with_index do |line, idx|
             trade_line_item(b, line, idx + 1, invoice.currency)
           end
-          header_trade_agreement(b, invoice)
+          header_trade_agreement(b, invoice, profile)
           b.tag("ram:ApplicableHeaderTradeDelivery")
           header_trade_settlement(b, invoice)
         end
@@ -109,23 +109,22 @@ module Einvoicing
       end
       private_class_method :trade_line_item
 
-      def self.header_trade_agreement(b, invoice)
+      def self.header_trade_agreement(b, invoice, profile)
         b.tag("ram:ApplicableHeaderTradeAgreement") do
           # BuyerReference must be first in the sequence (EN 16931 BR-10 / XSD order).
           b.text("ram:BuyerReference", invoice.payment_reference || "")
-          b.tag("ram:SellerTradeParty") { party_xml(b, invoice.seller) }
-          b.tag("ram:BuyerTradeParty")  { party_xml(b, invoice.buyer) }
+          b.tag("ram:SellerTradeParty") { party_xml(b, invoice.seller, profile) }
+          b.tag("ram:BuyerTradeParty")  { party_xml(b, invoice.buyer, profile) }
         end
       end
       private_class_method :header_trade_agreement
 
-      def self.party_xml(b, party)
+      def self.party_xml(b, party, profile)
         b.text("ram:Name", party.name)
         legal_id = party.siret || party.siren
         if legal_id
           b.tag("ram:SpecifiedLegalOrganization") do
-            # schemeID "SIRET" for Chorus Pro / PPF compliance (14-digit SIRET preferred)
-            scheme = party.siret ? "SIRET" : "0002"
+            scheme = (profile == :chorus_pro && party.siret) ? "SIRET" : "0002"
             b.text("ram:ID", legal_id, "schemeID" => scheme)
           end
         end

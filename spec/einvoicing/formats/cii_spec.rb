@@ -188,4 +188,43 @@ RSpec.describe Einvoicing::Formats::CII do
     errors = validate_against_xsd(xml, "EN16931")
     expect(errors).to be_empty, "XSD errors: #{errors.map(&:message).join(', ')}"
   end
+
+  context "with profile: :chorus_pro" do
+    let(:seller_siret) do
+      Einvoicing::Party.new(
+        name:         "Fournisseur Test",
+        street:       "1 rue de la Paix",
+        city:         "Paris",
+        postal_code:  "75001",
+        country_code: "FR",
+        siren:        "370647048",
+        siret:        "37064704857900",
+        vat_number:   "FR00370647048"
+      )
+    end
+
+    let(:xml) do
+      described_class.generate(
+        Einvoicing::Invoice.new(
+          invoice_number:     "CPRO-001",
+          issue_date:         Date.new(2024, 1, 15),
+          seller:             seller_siret,
+          buyer:              Fixtures.buyer,
+          lines:              [ Fixtures.line ],
+          payment_means_code: 30
+        ),
+        profile: :chorus_pro
+      )
+    end
+
+    it "uses schemeID SIRET for seller with SIRET" do
+      expect(xml).to include('schemeID="SIRET"')
+      expect(xml).to include("37064704857900")
+    end
+
+    it "uses schemeID 0002 for buyer with SIREN only" do
+      expect(xml).to include('schemeID="0002"')
+      expect(xml).to include("552032534")
+    end
+  end
 end

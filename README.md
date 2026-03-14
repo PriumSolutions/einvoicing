@@ -175,6 +175,20 @@ ubl = Einvoicing::Formats::UBL.generate(invoice)
 
 Produces a UBL 2.1 `Invoice` document with Peppol BIS Billing 3.0 customization ID.
 
+## Chorus Pro / PPF (France)
+
+When submitting to Chorus Pro (French B2G portal), generate CII XML with the `:chorus_pro` profile:
+
+```ruby
+xml = Einvoicing.xml(invoice, format: :cii, profile: :chorus_pro)
+```
+
+Chorus Pro-specific requirements:
+- `schemeID` for SIRET identifiers must be `"SIRET"` (not the ISO 6523 code `"0002"`)
+- `SpecifiedTradeSettlementPaymentMeans` is mandatory — set `payment_means_code:` on the invoice (30 = credit transfer)
+- Invoice ID (`invoice_number`) must not exceed 20 characters
+- Use `einvoicing-connect` for the actual API submission
+
 ## Rails Integration
 
 Include `Einvoicing::Invoiceable` in your ActiveRecord model and implement three methods:
