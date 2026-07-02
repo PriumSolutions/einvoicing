@@ -68,20 +68,42 @@ RSpec.describe Einvoicing::Invoiceable do
 
     it "can be overridden at class level" do
       custom_validator = Module.new do
-        def self.validate(_invoice) = []
+        def self.validate(_invoice)
+          []
+        end
       end
 
       custom_class = Class.new do
         include Einvoicing::Invoiceable
         self.einvoicing_validator = custom_validator
 
-        def invoice_number = "TEST-001"
-        def issue_date     = Date.new(2024, 1, 1)
-        def due_date       = nil
-        def currency       = "EUR"
-        def einvoicing_seller = Fixtures.seller
-        def einvoicing_buyer  = Fixtures.buyer
-        def einvoicing_lines  = [ Fixtures.line ]
+        def invoice_number
+          "TEST-001"
+        end
+
+        def issue_date
+          Date.new(2024, 1, 1)
+        end
+
+        def due_date
+          nil
+        end
+
+        def currency
+          "EUR"
+        end
+
+        def einvoicing_seller
+          Fixtures.seller
+        end
+
+        def einvoicing_buyer
+          Fixtures.buyer
+        end
+
+        def einvoicing_lines
+          [ Fixtures.line ]
+        end
       end
 
       instance = custom_class.new

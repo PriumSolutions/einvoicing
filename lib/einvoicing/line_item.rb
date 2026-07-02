@@ -3,6 +3,8 @@
 require "bigdecimal"
 require "bigdecimal/util"
 
+require_relative "data"
+
 module Einvoicing
   # A single line on an invoice.
   #

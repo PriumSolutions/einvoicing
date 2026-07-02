@@ -41,8 +41,8 @@ RSpec.describe Einvoicing::Formats::FacturX do
       idx = nil
       names_arr.each_with_index { |v, i| idx = i if v == "factur-x.xml" }
       expect(idx).not_to be_nil
-      filespec = names_arr[idx + 1]
-      ef_stream = filespec[:EF][:F]
+      filespec = doc.deref(names_arr[idx + 1])
+      ef_stream = doc.deref(filespec[:EF][:F])
       content = ef_stream.stream
       expect(content.force_encoding("UTF-8")).to include("<Invoice>")
     end

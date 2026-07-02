@@ -1,11 +1,9 @@
 plugins:
   - rubocop-rspec
-
-inherit_gem:
-  rubocop-rails-omakase: rubocop.yml
+  - rubocop-rails
 
 AllCops:
-  TargetRubyVersion: 3.2
+  TargetRubyVersion: 2.6
   NewCops: enable
   Exclude:
     - "bin/**/*"

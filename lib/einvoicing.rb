@@ -5,6 +5,7 @@ require "bigdecimal"
 require "bigdecimal/util"
 
 require_relative "einvoicing/version"
+require_relative "einvoicing/data"
 require_relative "einvoicing/errors"
 require_relative "einvoicing/tax"
 require_relative "einvoicing/party"

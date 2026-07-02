@@ -44,7 +44,7 @@ module Einvoicing
         # 1. Embed the XML as an embedded file stream.
         ef_stream = doc.add({
           Type:    :EmbeddedFile,
-          Subtype: "text/xml",
+          Subtype: MIME_TYPE.to_sym,
           Params:  { Size: xml_bytes.bytesize, CheckSum: md5(xml_bytes) }
         })
         ef_stream.set_filter(:FlateDecode)
@@ -52,8 +52,8 @@ module Einvoicing
 
         filespec = doc.add({
           Type: :Filespec,
-          F:    FILENAME,
-          UF:   FILENAME,
+          F:    FILENAME.dup,
+          UF:   FILENAME.dup,
           AFRelationship: :Data,
           Desc: "Factur-X invoice",
           EF:   { F: ef_stream, UF: ef_stream }
@@ -63,7 +63,7 @@ module Einvoicing
         doc.catalog[:Names] ||= doc.add({})
         names_dict = doc.catalog[:Names]
         names_dict[:EmbeddedFiles] ||= doc.add({ Names: [] })
-        names_dict[:EmbeddedFiles][:Names] << FILENAME << filespec
+        names_dict[:EmbeddedFiles][:Names] << FILENAME.dup << filespec
 
         # 3. Set AF array on the catalog.
         doc.catalog[:AF] = [ filespec ]
@@ -91,11 +91,10 @@ module Einvoicing
 
         # HexaPDF stores XMP in the document's metadata stream.
         meta = doc.catalog[:Metadata]
-        if meta
+        if meta.respond_to?(:stream=)
           meta.stream = raw_xmp
         else
-          meta = doc.add({ Type: :Metadata, Subtype: :XML })
-          meta.stream = raw_xmp
+          meta = doc.add({ Type: :Metadata, Subtype: :XML }, stream: raw_xmp)
           doc.catalog[:Metadata] = meta
         end
       end

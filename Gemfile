@@ -4,7 +4,7 @@ gemspec
 
 # Development extras
 group :development do
-  gem "pry"
+  gem "pry", "~> 0.16"
   gem "prawn"
   gem "prawn-table"
   gem "matrix"

@@ -3,6 +3,8 @@
 require "bigdecimal"
 require "bigdecimal/util"
 
+require_relative "data"
+
 module Einvoicing
   # Core invoice model. All monetary values are in the invoice currency.
   #

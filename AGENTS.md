@@ -19,7 +19,7 @@ bundle exec rubocop                                        # Lint
 ## Architecture
 
 ### Core Models (`lib/einvoicing/`)
-All use `Data.define` (Ruby 3.2+, immutable) with `BigDecimal` for financial calculations:
+All use `Data.define` with a Ruby 2.6 compatibility shim and `BigDecimal` for financial calculations:
 - **Invoice** — top-level aggregate; auto-computes `tax_breakdown`, `net_total`, `tax_total`, `gross_total`, `due_amount`
 - **Party** — seller/buyer; resolves Peppol endpoint (SIRET → scheme 0002, fallback to email); supports `fetch_siret!` via Sirene API
 - **LineItem** — description, quantity, unit_price, vat_rate; computes net/vat/gross amounts
@@ -54,7 +54,7 @@ Bundled XSD files for Factur-X profiles (BASIC, EN16931, EXTENDED, etc.), `srgb.
 Shared fixtures are defined in `spec/spec_helper.rb` as `Fixtures.seller`, `Fixtures.buyer`, `Fixtures.line`, `Fixtures.invoice`. Seller uses La Poste SIREN (356000000, valid Luhn); buyer uses Renault SIREN (552032534).
 
 ## Key Constraints
-- Ruby >= 3.2 required (`Data.define`)
-- Only one runtime dependency: `hexapdf ~> 1.0`
+- Ruby >= 2.6 required
+- Runtime dependencies: `hexapdf >= 0.36, < 0.37` and `i18n >= 1.0, < 1.15`
 - Peppol validation requires Java 21 + Saxon-HE 12 JAR (downloaded by CI)
 - Use `BigDecimal` for all financial values — never `Float`

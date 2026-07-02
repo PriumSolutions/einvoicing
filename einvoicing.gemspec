@@ -21,22 +21,30 @@ Gem::Specification.new do |s|
   }
   s.license  = "MIT"
 
-  s.required_ruby_version = ">= 3.2"
+  s.required_ruby_version = ">= 2.7.4"
 
   s.files = Dir["lib/**/*.rb", "lib/**/*.icc", "lib/**/*.xslt", "config/locales/*.yml",
                 "README.md", "CHANGELOG.md", "LICENSE"]
 
   # Runtime dependencies.
-  s.add_dependency "hexapdf", "~> 1.0"
-  s.add_dependency "i18n",    "~> 1.0"
+  s.add_dependency "hexapdf", "= 0.6.0"
+  s.add_dependency "i18n",    ">= 1.0", "< 1.15"
 
   # Dev/test dependencies.
+  s.add_development_dependency "activesupport",        "~> 6.1"
+  s.add_development_dependency "json",                 "~> 2.7.0"
+  s.add_development_dependency "minitest",             "~> 5.22.0"
   s.add_development_dependency "rspec",                "~> 3.13"
-  s.add_development_dependency "rubocop",              "~> 1.70"
-  s.add_development_dependency "rubocop-rails-omakase"
-  s.add_development_dependency "rubocop-rspec",        "~> 3.0"
-  s.add_development_dependency "nokogiri",             "~> 1.16" # XSD validation in specs
-  s.add_development_dependency "rexml"    # Bundled gem in Ruby 4.0+
+  s.add_development_dependency "rubocop",              "~> 1.49.0"
+  s.add_development_dependency "rubocop-ast",          "~> 1.28.0"
+  s.add_development_dependency "rubocop-rails",        "~> 2.19.1"
+  s.add_development_dependency "rubocop-rspec",        "~> 2.20.0"
+  s.add_development_dependency "nokogiri",             "~> 1.14.3" # XSD validation in specs
+  s.add_development_dependency "parallel",             "~> 1.24.0"
+  s.add_development_dependency "rexml",                "~> 3.2" # Bundled gem in Ruby 4.0+
   s.add_development_dependency "prawn"    # PDF generation in sample scripts
+  s.add_development_dependency "public_suffix",        "< 6"
+  s.add_development_dependency "rack",                 "~> 2.2"
   s.add_development_dependency "webmock", "~> 3.0"
+  s.add_development_dependency "zeitwerk",             "~> 2.6.18"
 end

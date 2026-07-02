@@ -3,6 +3,8 @@
 require "bigdecimal"
 require "bigdecimal/util"
 
+require_relative "data"
+
 module Einvoicing
   # VAT breakdown entry for a single tax rate.
   Tax = Data.define(:rate, :taxable_amount, :tax_amount, :category) do

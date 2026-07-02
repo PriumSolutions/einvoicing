@@ -48,7 +48,9 @@ module Einvoicing
       # @example
       #   self.einvoicing_validator = Einvoicing::Validators::DE
       def einvoicing_validator
-        @einvoicing_validator || Einvoicing::Validators::FR
+        return @einvoicing_validator if defined?(@einvoicing_validator) && @einvoicing_validator
+
+        Einvoicing::Validators::FR
       end
 
       def einvoicing_validator=(validator)
